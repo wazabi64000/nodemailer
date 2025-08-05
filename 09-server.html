@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Serveur principal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="brand">VérifCompte</div>
+      <div class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html" class="active">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Serveur principal <code>server.js</code></h1>
+
+    <p>Ce fichier est le point d'entrée de l'application. Il initialise Express, MongoDB, les routes, les middlewares et le port d'écoute.</p>
+
+    <pre><code class="language-js">
+// server.js
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import userRoutes from './routes/userRoutes.js';
+
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+
+// Routes
+app.use('/api/users', userRoutes);
+
+// Page de test
+app.get('/', (req, res) => {
+  res.send('API fonctionnelle');
+});
+
+// Connexion à MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log(' Connecté à MongoDB');
+    app.listen(process.env.PORT, () => {
+      console.log(` Serveur lancé sur http://localhost:${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error(' Erreur de connexion MongoDB :', err);
+  });
+    </code></pre>
+
+    <h2>Structure simplifiée du projet :</h2>
+    <ul>
+      <li><code>/controllers</code> — logique métier</li>
+      <li><code>/models</code> — schéma MongoDB</li>
+      <li><code>/routes</code> — API Express</li>
+      <li><code>/utils</code> — outils comme mailer</li>
+      <li><code>/config</code> — connexion à la base</li>
+      <li><code>/middlewares</code> — fonctions intermédiaires</li>
+      <li><code>.env</code> — variables d'environnement</li>
+    </ul>
+
+    <div class="accessible-highlight">
+      <strong>Conseil accessibilité :</strong> Bien structurer le projet permet à une équipe (y compris développeurs juniors ou malvoyants avec lecteurs d’écran) de s'y retrouver facilement.
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>

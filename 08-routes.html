@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Routes Express</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="brand">VérifCompte</div>
+      <div class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html" class="active">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Création des routes</h1>
+
+    <p>Les routes permettent d'accéder aux fonctions du contrôleur via des URLs d'API.</p>
+
+    <h2>1. Créer le fichier <code>routes/userRoutes.js</code></h2>
+
+    <pre><code class="language-js">
+// routes/userRoutes.js
+import express from 'express';
+import { register, verifyEmail } from '../controllers/userController.js';
+
+const router = express.Router();
+
+// Route d'inscription
+router.post('/register', register);
+
+// Route de vérification via lien email
+router.get('/verify/:token', verifyEmail);
+
+export default router;
+    </code></pre>
+
+    <h2>2. Explication</h2>
+    <ul>
+      <li><strong>POST /register</strong> → enregistre un utilisateur et envoie un lien de vérification par e-mail.</li>
+      <li><strong>GET /verify/:token</strong> → l’utilisateur clique le lien, on valide le token, on active son compte.</li>
+    </ul>
+
+    <h2>3. Middleware (optionnel)</h2>
+    <p>On pourrait ajouter un middleware pour vérifier si l'utilisateur est déjà connecté ou authentifié par JWT.</p>
+
+    <pre><code class="language-js">
+// middlewares/auth.js (exemple futur)
+import jwt from 'jsonwebtoken';
+
+export const protect = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Non autorisé' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json({ message: 'Token invalide' });
+  }
+};
+    </code></pre>
+
+    <div class="accessible-highlight">
+      <strong>Bonnes pratiques :</strong> chaque route est bien séparée, ce qui améliore la lisibilité, le test unitaire, et la sécurité.
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>

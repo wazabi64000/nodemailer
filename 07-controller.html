@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contrôleur utilisateur</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+ 
+      <div class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html" class="active">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Contrôleur Utilisateur (controllers/userController.js)</h1>
+
+    <p>Ce fichier gère l'inscription, l'envoi de mail de vérification, la vérification du compte et la génération du token JWT.</p>
+
+    <h2>1. Inscription & Envoi du lien</h2>
+
+    <pre><code class="language-js">
+// controllers/userController.js
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+import { sendVerificationEmail } from '../utils/mailer.js';
+
+export const register = async (req, res) => {
+  const { email } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) return res.status(400).json({ message: 'Email déjà enregistré' });
+
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+
+  const user = await User.create({
+    email,
+    verificationToken: token,
+    verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000)
+  });
+
+  await sendVerificationEmail(email, token);
+
+  res.status(201).json({ message: 'Utilisateur créé, vérifiez votre email' });
+};
+    </code></pre>
+
+    <h2>2. Vérification du compte</h2>
+
+    <pre><code class="language-js">
+export const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ email: decoded.email });
+
+    if (!user) return res.status(404).json({ message: 'Utilisateur introuvable' });
+    if (user.isVerified) return res.status(400).json({ message: 'Compte déjà vérifié' });
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Compte vérifié avec succès' });
+  } catch (error) {
+    res.status(400).json({ message: 'Token invalide ou expiré' });
+  }
+};
+    </code></pre>
+
+    <div class="accessible-highlight">
+      <strong>Remarque :</strong> Ici, nous utilisons <code>jsonwebtoken</code> pour la génération et la validation.  
+      Il existe aussi des alternatives comme <code>crypto</code> (inclus dans Node.js), <code>uuid</code> ou <code>bcrypt</code> pour des besoins différents.
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mailer avec Gmail et Nodemailer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="brand">VérifCompte</div>
+      <div class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html" class="active">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Utilisation de Gmail avec Nodemailer</h1>
+
+    <p>Pour envoyer un e-mail de vérification à l'utilisateur, nous utilisons la bibliothèque <code>nodemailer</code> avec un compte Gmail.</p>
+
+    <h2>Créer un mot de passe d'application Gmail</h2>
+    <ol>
+      <li>Activer la validation en 2 étapes dans votre compte Google.</li>
+      <li>Aller dans <a href="https://myaccount.google.com/apppasswords" target="_blank">https://myaccount.google.com/apppasswords</a></li>
+      <li>Générer un mot de passe pour "Mail" → "Autre (nom personnalisé)"</li>
+      <li>Copiez ce mot de passe dans votre fichier <code>.env</code> :</li>
+    </ol>
+
+    <pre><code>
+EMAIL_USER=votremail@gmail.com
+EMAIL_PASS=leMotDePasseApp
+    </code></pre>
+
+    <h2>Fichier utils/mailer.js</h2>
+
+    <p>Crée un fichier <code>utils/mailer.js</code> pour configurer et envoyer les emails :</p>
+
+    <pre><code class="language-js">
+// utils/mailer.js
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+export const sendVerificationEmail = async (to, token) => {
+  const link = `http://localhost:5000/api/verify/${token}`;
+
+  const mailOptions = {
+    from: `"Vérification" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: 'Vérification de votre compte',
+    html: `
+      <h3>Confirmez votre compte</h3>
+      <p>Merci de cliquer sur le lien ci-dessous pour activer votre compte :</p>
+      <a href="${link}">${link}</a>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+    </code></pre>
+
+    <div class="accessible-highlight">
+      <strong>Accessibilité :</strong> L'email HTML contient un lien visible et explicite, utile pour les lecteurs d'écran.
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>
