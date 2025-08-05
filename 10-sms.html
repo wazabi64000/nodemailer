@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vérification par SMS (Twilio gratuit)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+     
+      <div class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+        <li><a href="10-sms.html" class="active">SMS (Twilio)</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Vérification par SMS avec Twilio (crédit gratuit)</h1>
+
+    <p>
+      En complément de l’email, tu peux vérifier le numéro de téléphone via SMS.<br />
+      Twilio propose un plan gratuit avec crédit de départ, idéal pour les tests.
+    </p>
+
+    <h2>1. Créer un compte Twilio</h2>
+    <ul>
+      <li>Inscris-toi sur <a href="https://www.twilio.com" target="_blank" rel="noopener">twilio.com</a>.</li>
+      <li>Note ton <code>ACCOUNT_SID</code>, <code>AUTH_TOKEN</code> et <code>NUMERO_TWILIO</code> (numéro virtuel fourni).</li>
+    </ul>
+
+    <h2>2. Installer la dépendance Twilio</h2>
+
+    <pre><code>npm install twilio</code></pre>
+
+    <h2>3. Ajouter les variables dans <code>.env</code></h2>
+
+    <pre><code>
+TWILIO_ACCOUNT_SID=TON_ACCOUNT_SID
+TWILIO_AUTH_TOKEN=TON_AUTH_TOKEN
+TWILIO_PHONE_NUMBER=+33600000000
+    </code></pre>
+
+    <h2>4. Créer un utilitaire d’envoi SMS</h2>
+
+    <pre><code class="language-js">
+// utils/smsSender.js
+import twilio from 'twilio';
+
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+export const sendVerificationSms = async (to, code) => {
+  try {
+    await client.messages.create({
+      body: `Votre code de vérification est : ${code}`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to
+    });
+  } catch (error) {
+    console.error('Erreur envoi SMS:', error);
+    throw error;
+  }
+};
+    </code></pre>
+
+    <h2>5. Modifier le modèle utilisateur pour gérer le code SMS</h2>
+
+    <pre><code class="language-js">
+// models/User.js (extrait)
+verificationSmsCode: String,
+smsCodeExpires: Date,
+isPhoneVerified: {
+  type: Boolean,
+  default: false,
+},
+    </code></pre>
+
+    <h2>6. Ajouter la logique dans le contrôleur</h2>
+
+    <pre><code class="language-js">
+// controllers/userController.js (extraits)
+import { sendVerificationSms } from '../utils/smsSender.js';
+
+export const sendSmsCode = async (req, res) => {
+  const { phone } = req.body;
+  // Génère un code à 6 chiffres
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+  const user = await User.findOne({ phone });
+  if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+
+  user.verificationSmsCode = code;
+  user.smsCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  await user.save();
+
+  await sendVerificationSms(phone, code);
+
+  res.json({ message: 'Code SMS envoyé' });
+};
+
+export const verifySmsCode = async (req, res) => {
+  const { phone, code } = req.body;
+
+  const user = await User.findOne({ phone });
+  if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+
+  if (user.isPhoneVerified) return res.status(400).json({ message: 'Téléphone déjà vérifié' });
+
+  if (user.verificationSmsCode !== code) return res.status(400).json({ message: 'Code incorrect' });
+
+  if (user.smsCodeExpires < Date.now()) return res.status(400).json({ message: 'Code expiré' });
+
+  user.isPhoneVerified = true;
+  user.verificationSmsCode = undefined;
+  user.smsCodeExpires = undefined;
+  await user.save();
+
+  res.json({ message: 'Téléphone vérifié avec succès' });
+};
+    </code></pre>
+
+    <h2>7. Définir les routes SMS</h2>
+
+    <pre><code class="language-js">
+// routes/userRoutes.js (ajouter)
+router.post('/send-sms-code', sendSmsCode);
+router.post('/verify-sms-code', verifySmsCode);
+    </code></pre>
+
+    <h2>Notes importantes</h2>
+    <ul>
+      <li>Twilio gratuit limite les numéros à tester (mode sandbox).</li>
+      <li>Pour un service 100% gratuit, tu peux explorer <a href="https://www.textbelt.com/" target="_blank" rel="noopener">Textbelt</a>, mais il y a souvent des limites et moins de fiabilité.</li>
+      <li>Pense toujours à sécuriser la transmission des numéros et codes (HTTPS, validation côté client et serveur).</li>
+    </ul>
+
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>
