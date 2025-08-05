@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Introduction - Vérification de compte</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+    
+      <ul id="nav-links">
+        <li><a href="01-introduction.html" class="active">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+        <li><a href="10-sms.html" class="active">SMS (Twilio)</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <h1>Introduction</h1>
+    <p>
+      Dans ce projet, nous allons créer une application de vérification de compte utilisateur par email et SMS. 
+      Cela permet d'assurer la validité et la sécurité des comptes.
+    </p>
+    
+    <div class="accessible-highlight" role="region" aria-label="Sensibilisation à l'accessibilité">
+      <h2>Accessibilité & Daltonisme</h2>
+      <p>
+        Nous avons choisi un design avec un contraste élevé et des couleurs accessibles pour toutes et tous, y compris les personnes daltoniennes.
+        Le daltonisme affecte environ 8% des hommes et 0,5% des femmes dans le monde, rendant difficile la distinction de certaines couleurs.
+      </p>
+      <p>
+        Pour garantir une expérience optimale, nous utilisons des couleurs avec un bon contraste et des indications visuelles claires (ex : focus visible).
+        Cela rend notre application plus inclusive.
+      </p>
+    </div>
+
+    <h2>Pourquoi la vérification de compte ?</h2>
+    <p>
+      La vérification par email ou SMS permet de réduire les fraudes, s'assurer que les utilisateurs ont accès à leurs contacts et améliorer la confiance dans la plateforme.
+    </p>
+  </main>
+
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('show');
+    });
+
+    menuToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navLinks.classList.toggle('show');
+      }
+    });
+  </script>
+</body>
+</html>
