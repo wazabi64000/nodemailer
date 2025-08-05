@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modèle Utilisateur</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+ 
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html" class="active">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Modèle Utilisateur avec Mongoose</h1>
+
+    <p>Le modèle utilisateur est essentiel pour stocker les informations du compte, son statut (vérifié ou non), les tokens de vérification, etc.</p>
+
+    <pre><code class="language-js">
+// models/User.js
+import mongoose from 'mongoose';
+
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+  phone: {
+    type: String,
+    required: false
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: String,
+  verificationTokenExpires: Date,
+  password: {
+    type: String,
+    required: false // pas obligatoire ici
+  }
+}, { timestamps: true });
+
+const User = mongoose.model('User', userSchema);
+export default User;
+    </code></pre>
+
+    <h2>Explication du schéma :</h2>
+    <ul>
+      <li><strong>email</strong> — Identifiant principal de l’utilisateur (obligatoire)</li>
+      <li><strong>phone</strong> — Utilisé pour la vérification par SMS</li>
+      <li><strong>isVerified</strong> — Indique si le compte a été confirmé</li>
+      <li><strong>verificationToken</strong> — Token unique pour valider le compte (par email ou lien)</li>
+      <li><strong>verificationTokenExpires</strong> — Date d’expiration du token</li>
+      <li><strong>password</strong> — Optionnel selon ton système d’authentification</li>
+    </ul>
+
+    <div class="accessible-highlight">
+      <strong>Accessibilité :</strong> On privilégie des noms de champs explicites, utiles à l’API comme aux outils d’administration accessibles.
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>

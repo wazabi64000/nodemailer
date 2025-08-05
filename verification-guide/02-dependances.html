@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dépendances du projet</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+ 
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html" class="active">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <h1>Dépendances et outils utilisés</h1>
+    
+    <p>
+      Dans ce projet, nous utilisons plusieurs bibliothèques et services pour faciliter la vérification de comptes via email et SMS.
+    </p>
+
+    <h2>1. Dépendances principales (backend Node.js)</h2>
+    <ul>
+      <li><strong>express</strong> — Framework minimal pour gérer les routes et le serveur HTTP.</li>
+      <li><strong>mongoose</strong> — ODM pour interagir avec MongoDB.</li>
+      <li><strong>dotenv</strong> — Pour charger les variables d’environnement depuis un fichier <code>.env</code>.</li>
+      <li><strong>jsonwebtoken (JWT)</strong> — Pour générer des tokens de vérification uniques, sûrs et expirables.</li>
+      <li><strong>nodemailer</strong> — Pour envoyer des emails de vérification (avec Gmail).</li>
+    </ul>
+
+    <h2>2. Vérification par Email</h2>
+    <p>
+      Nous utilisons <strong>Gmail</strong> (via <code>nodemailer</code>) avec un mot de passe d’application. C’est un service gratuit mais limité (envois quotidiens restreints).
+    </p>
+
+    <h2>3. Vérification par SMS</h2>
+    <p>
+      Il existe plusieurs services. Voici une comparaison :
+    </p>
+    <ul>
+      <li><strong>Free (gratuits)</strong> :
+        <ul>
+          <li><strong>Vonage (ex-Nexmo)</strong> — offre gratuite limitée (crédits à l’inscription).</li>
+          <li><strong>Twilio (mode test)</strong> — crédit gratuit avec numéro de test.</li>
+        </ul>
+      </li>
+      <li><strong>Payants</strong> :
+        <ul>
+          <li><strong>Twilio</strong> — très populaire, fiable, API complète.</li>
+          <li><strong>MessageBird</strong>, <strong>Infobip</strong>, etc.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2>4. Outils de sécurité et alternative</h2>
+    <ul>
+      <li><strong>crypto</strong> (inclus dans Node.js) — Génère des identifiants uniques, alternative simple à JWT.</li>
+      <li><strong>uuid</strong> — Pour générer des tokens uniques, mais sans expiration intégrée.</li>
+      <li><strong>bcrypt</strong> — Hachage de mots de passe (pas utilisé ici mais utile en général).</li>
+    </ul>
+
+    <div class="accessible-highlight">
+      <strong>Conseil accessibilité :</strong> Choisissez des services fiables avec une documentation claire, cela aide aussi les développeurs malvoyants ou dyslexiques grâce à un code plus prévisible et accessible.
+    </div>
+  </main>
+
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('show');
+    });
+
+    menuToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navLinks.classList.toggle('show');
+      }
+    });
+  </script>
+</body>
+</html>

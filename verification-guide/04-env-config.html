@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Configuration .env & MongoDB</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+
+      <ul id="nav-links">
+        <li><a href="01-introduction.html">Introduction</a></li>
+        <li><a href="02-dependances.html">Dépendances</a></li>
+        <li><a href="03-installation.html">Installation</a></li>
+        <li><a href="04-env-config.html" class="active">.env & Config</a></li>
+        <li><a href="05-model.html">Modèle</a></li>
+        <li><a href="06-mailer.html">Mailer</a></li>
+        <li><a href="07-controller.html">Contrôleur</a></li>
+        <li><a href="08-routes.html">Routes</a></li>
+        <li><a href="09-server.html">Serveur</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <h1>Fichier .env et Configuration de MongoDB</h1>
+
+    <h2>1. Le fichier .env</h2>
+    <p>Ce fichier contient toutes les données sensibles à ne jamais partager (URL de DB, mot de passe d'app Gmail, clé JWT...)</p>
+
+    <pre><code>
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/verifdb
+EMAIL_USER=votreadresse@gmail.com
+EMAIL_PASS=motdepasseapp
+JWT_SECRET=jetonsecret
+JWT_EXPIRES_IN=1d
+    </code></pre>
+
+    <h2>2. Connexion à MongoDB</h2>
+    <p>Dans <code>config/db.js</code>, on utilise mongoose pour se connecter à la base :</p>
+
+    <pre><code class="language-js">
+// config/db.js
+import mongoose from 'mongoose';
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log(' MongoDB connecté');
+  } catch (error) {
+    console.error(' Erreur MongoDB :', error.message);
+    process.exit(1);
+  }
+};
+
+export default connectDB;
+    </code></pre>
+
+    <div class="accessible-highlight">
+      <strong>Sécurité :</strong> Le fichier <code>.env</code> ne doit jamais être versionné (<code>.gitignore</code> doit contenir <code>.env</code>).
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.getElementById("menu-toggle");
+    const links = document.getElementById("nav-links");
+    toggle.addEventListener("click", () => links.classList.toggle("show"));
+    toggle.addEventListener("keydown", e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); links.classList.toggle("show");
+      }
+    });
+  </script>
+</body>
+</html>
